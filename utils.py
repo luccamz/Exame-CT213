@@ -3,8 +3,8 @@ from numpy import dot
 # gym enviroment params
 BOARD_SZ = 4
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
-TIME_LIMIT = 10*BOARD_SZ
-FIXED_SEED = 2
+TIME_LIMIT = 20*BOARD_SZ
+FIXED_SEED = 1
 
 # maps the flattened state displacement to the corresponding action
 displacement_to_action = { 
@@ -17,13 +17,14 @@ displacement_to_action = {
 
 # rewards and punishments coefficients
 rp = {
-    "completed" : 100.,
-    "goal_direction" : 10.,
-    "deliberate_action" : 5.,
-    "lost_on_time" : -80.,
-    "stuck" : -20.,
-    "moving_backwards" : -20.,
-    "fell_in_hole" : -200.,
+    "completed" : 300.,
+    "goal_direction" : 20.,
+    "deliberate_action" : 10.,
+    #"lost_on_time" : -80.,
+    #"stuck" : -30.,
+    #"moving_backwards" : -100.,
+    "fell_in_hole" : -1000.,
+    #"at_corner" : -100
 }
 
 def reward_engineering(state: int, prev_action: int, action: int, completed: int, next_state: int, terminated: bool, lost_on_time: bool) -> float:
@@ -47,13 +48,16 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     :return: modified reward.
     :rtype: float.
     """
-    displacement = next_state[0] - state[0]
+    displacement = next_state - state
     action_taken = displacement_to_action[displacement]
     deliberate_action = int(action_taken == action)
-    goal_direction = 1 if action_taken == 2 or action_taken == 1 else -1
+    goal_direction = 1 if (action % 3) != 0 else -1
     stuck = int(displacement == 0)
-    fell_in_hole = int(completed != 1 and terminated and not lost_on_time)
-    moving_backwards = (prev_action - action) % 2
+    fell_in_hole = int(completed == 0 and terminated and not lost_on_time)
+    moving_backwards = (1 + prev_action - action) % 2
+    at_corner = 1 if state == 12 or state == 3 else 0
     loc = locals()
     states = list(map(loc.get, rp.keys()))
-    return dot(list(rp.values()), states)
+    return dot(list(rp.values()), states) 
+
+action_dir = ['L','D','R','U']

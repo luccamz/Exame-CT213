@@ -1,16 +1,13 @@
 import random
 import numpy as np
 from collections import deque
-from tensorflow import keras
-from keras import models, layers, activations
-from tensorflow import optimizers, losses
-from utils import BOARD_SZ
+from utils import action_dir, BOARD_SZ
 
 class DQNAgent:
     """
     Represents a Deep Q-Networks (DQN) agent.
     """
-    def __init__(self, action_size, state_size = 1, gamma=0.95, epsilon=0.7, epsilon_min=0.01, epsilon_decay=0.98, learning_rate=0.001, buffer_size=200*BOARD_SZ):
+    def __init__(self, observation_sz, action_size, state_size = 1, alpha = 0.9, gamma=0.95, epsilon=0.8, epsilon_min=0.01, epsilon_decay=0.99, learning_rate=0.001, buffer_size=100):
         """
         Creates a Deep Q-Networks (DQN) agent.
 
@@ -34,29 +31,13 @@ class DQNAgent:
         self.state_size = state_size
         self.action_size = action_size
         self.replay_buffer = deque(maxlen=buffer_size)
+        self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.learning_rate = learning_rate
-        self.model = self.make_model()
-
-    def make_model(self):
-        """
-        Makes the action-value neural network model using Keras.
-
-        :return: action-value neural network.
-        :rtype: Keras' model.
-        """
-        model = models.Sequential()
-        model.add(layers.Dense(24, activation = activations.linear, input_dim = self.state_size))
-        model.add(layers.ReLU())
-        model.add(layers.Dense(24, activation = activations.linear))
-        model.add(layers.ReLU())
-        model.add(layers.Dense(self.action_size, activation = activations.linear))
-        model.compile(loss=losses.mse,
-                       optimizer=optimizers.legacy.Adam(learning_rate = self.learning_rate))
-        return model
+        self.q = np.zeros((observation_sz, action_size), dtype=np.float64)
 
     def act(self, state):
         """
@@ -67,14 +48,16 @@ class DQNAgent:
         :return: chosen action.
         :rtype: int.
         """
-        values = self.model.predict(state)[0]
+        # redundant early return for performance
+        if self.epsilon == 0.0:
+            return np.argmax(self.q[state,:])
         r = random.uniform(0,1)
         if r < self.epsilon:
             return int(np.random.uniform(high=self.action_size))
         else:
-            return np.argmax(values)
+            return np.argmax(self.q[state,:])
 
-    def append_experience(self, state, action, reward, next_state, completed):
+    def append_experience(self, state, action, reward, next_state):
         """
         Appends a new experience to the replay buffer (and forget an old one if the buffer is full).
 
@@ -86,10 +69,8 @@ class DQNAgent:
         :type reward: float.
         :param next_state: next state.
         :type next_state: NumPy array with dimension (1, 2).
-        :param completed: if the end goal was reached
-        :type completed: int.
         """
-        self.replay_buffer.append((state, action, reward, next_state, completed))
+        self.replay_buffer.append((state, action, reward, next_state))
 
     def replay(self, batch_size):
         """
@@ -101,20 +82,8 @@ class DQNAgent:
         :rtype: float.
         """
         minibatch = random.sample(self.replay_buffer, batch_size)
-        states, targets = [], []
-        for state, action, reward, next_state, terminated in minibatch:
-            target = self.model.predict(state)
-            if not terminated:
-                target[0][action] = reward + self.gamma * np.max(self.model.predict(next_state)[0])
-            else:
-                target[0][action] = reward
-            # Filtering out states and targets for training
-            states.append(state)
-            targets.append(target[0])
-        history = self.model.fit(np.array(states), np.array(targets), epochs=1, verbose=0)
-        # Keeping track of loss
-        loss = history.history['loss'][0]
-        return loss
+        for state, action, reward, next_state in minibatch:
+            self.q[state, action] += self.alpha*(reward + self.gamma * np.max(self.q[next_state, :]) - self.q[state, action])
 
     def load(self, name):
         """
@@ -123,16 +92,12 @@ class DQNAgent:
         :param name: model's name.
         :type name: str.
         """
-        self.model.load_weights(name)
+        with open(name, "rb") as f:
+            self.q = np.load(f, allow_pickle=True)
 
     def save(self, name):
-        """
-        Saves the neural network's weights to disk.
-
-        :param name: model's name.
-        :type name: str.
-        """
-        self.model.save_weights(name)
+        with open(name, "wb") as f:
+            self.q.dump(f)
 
     def update_epsilon(self):
         """
@@ -141,3 +106,11 @@ class DQNAgent:
         self.epsilon *= self.epsilon_decay
         if self.epsilon < self.epsilon_min:
             self.epsilon = self.epsilon_min
+    
+    def display_greedy_policy(self):
+        disp = []
+        for row in self.q:
+            disp.append(action_dir[row.argmax()])
+        disp = np.reshape(disp, (BOARD_SZ, BOARD_SZ))
+        print("Greedy policy:")
+        print(disp)

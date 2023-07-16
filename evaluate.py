@@ -22,24 +22,27 @@ map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
 env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=True, render_mode='human' if RENDER else None)
 env = TimeLimit(env, TIME_LIMIT*BOARD_SZ)
 action_size = env.action_space.n
+observation_sz = env.observation_space.n
 
 # Creating the DQN agent (with greedy policy, suited for evaluation)
-agent = DQNAgent(action_size, epsilon=0.0, epsilon_min=0.0)
+agent = DQNAgent(observation_sz, action_size, epsilon=0.0, epsilon_min=0.0)
 
 # Checking if weights from previous learning session exists
-if os.path.exists('frozen_lake.h5'):
+if os.path.exists('frozen_lake.pkl'):
     print('Loading weights from previous learning session.')
-    agent.load("frozen_lake.h5")
+    agent.load("frozen_lake.pkl")
 else:
     print('No weights found from previous learning session. Unable to proceed.')
     exit(-1)
+
+agent.display_greedy_policy()
+
 return_history = []
 time_history = []
 rate_of_completion = 0.0
 for episode in range(1, NUM_EPISODES + 1):
     # Reset the environment
     state, _ = env.reset()
-    state = np.array([state])
     # Cumulative reward is the return since the beginning of the episode
     cumulative_reward = 0.0
     prev_action = -1
@@ -51,7 +54,6 @@ for episode in range(1, NUM_EPISODES + 1):
         action = agent.act(state)
         # Take action, observe reward and new state
         next_state, completed, terminated, truncated, _ = env.step(action)
-        next_state = np.array([next_state])
         # Making reward engineering to keep compatibility with how training was done
         reward = reward_engineering(state, prev_action, action, completed, next_state, terminated, truncated)
         prev_action = action
