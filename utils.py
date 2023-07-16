@@ -1,10 +1,11 @@
 from numpy import dot
 
 # gym enviroment params
-BOARD_SZ = 4
+BOARD_SZ = 7
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 20*BOARD_SZ
-FIXED_SEED = 1
+FIXED_SEED = 0
+SLIPPERY = False
 
 # maps the flattened state displacement to the corresponding action
 displacement_to_action = { 
@@ -17,13 +18,13 @@ displacement_to_action = {
 
 # rewards and punishments coefficients
 rp = {
-    "completed" : 300.,
-    "goal_direction" : 20.,
-    "deliberate_action" : 10.,
+    "completed" : 100.,
+    "goal_direction" : 2.,
+    #"deliberate_action" : 10.,
     #"lost_on_time" : -80.,
-    #"stuck" : -30.,
+    "stuck" : -3.,
     #"moving_backwards" : -100.,
-    "fell_in_hole" : -1000.,
+    "fell_in_hole" : -100.,
     #"at_corner" : -100
 }
 
