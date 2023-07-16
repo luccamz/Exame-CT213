@@ -1,4 +1,8 @@
 import os
+
+# to silence tensorflow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from gymnasium.wrappers.time_limit import TimeLimit
@@ -6,6 +10,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED
+import tensorflow as tf
+
+# this line is important
+tf.compat.v1.disable_eager_execution()
 
 NUM_EPISODES = 20  # Number of episodes used for evaluation
 RENDER = True # choose whether to show the GUI of the gym environment

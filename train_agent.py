@@ -1,4 +1,8 @@
 import os
+
+# to silence tensorflow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from gymnasium.wrappers.time_limit import TimeLimit
@@ -6,7 +10,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED
+import tensorflow as tf
 
+# rhis is important
+tf.compat.v1.disable_eager_execution()
 
 NUM_EPISODES = 300  # Number of episodes used for training
 
@@ -58,7 +65,7 @@ for episode in range(1, NUM_EPISODES + 1):
         # We only update the policy if we already have enough experience in memory
         if len(agent.replay_buffer) > 2 * batch_size:
             loss = agent.replay(batch_size)
-            print("loss: {:.3f}".format(loss))
+            #print("loss: {:.3f}".format(loss))
     return_history.append(cumulative_reward)
     agent.update_epsilon()
     if episode % 20:
