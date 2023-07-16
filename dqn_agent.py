@@ -7,7 +7,7 @@ class DQNAgent:
     """
     Represents a Deep Q-Networks (DQN) agent.
     """
-    def __init__(self, observation_sz, action_size, state_size = 1, alpha = 0.9, gamma=0.95, epsilon=0.8, epsilon_min=0.01, epsilon_decay=0.99, learning_rate=0.001, buffer_size=100):
+    def __init__(self, observation_sz, action_size, state_size = 1, alpha = 0.9, gamma=0.95, epsilon=0.8, epsilon_min=0.01, epsilon_decay=0.99, buffer_size=BOARD_SZ**2):
         """
         Creates a Deep Q-Networks (DQN) agent.
 
@@ -36,7 +36,6 @@ class DQNAgent:
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
-        self.learning_rate = learning_rate
         self.q = np.zeros((observation_sz, action_size), dtype=np.float64)
 
     def act(self, state):
