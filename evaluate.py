@@ -1,7 +1,4 @@
 import os
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from gymnasium.wrappers.time_limit import TimeLimit
@@ -9,21 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED
-import tensorflow as tf
-
-# def plot_points(point_list, style):
-#     x = []
-#     y = []
-#     for point in point_list:
-#         x.append(point[0])
-#         y.append(point[1])
-#     plt.plot(x, y, style)
-
 
 NUM_EPISODES = 20  # Number of episodes used for evaluation
-RENDER = True
-
-tf.compat.v1.disable_eager_execution()
+RENDER = True # choose whether to show the GUI of the gym environment
 
 map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
 env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=True, render_mode='human' if RENDER else None)

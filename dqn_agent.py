@@ -102,9 +102,9 @@ class DQNAgent:
         """
         minibatch = random.sample(self.replay_buffer, batch_size)
         states, targets = [], []
-        for state, action, reward, next_state, completed in minibatch:
+        for state, action, reward, next_state, terminated in minibatch:
             target = self.model.predict(state)
-            if completed != 1:
+            if not terminated:
                 target[0][action] = reward + self.gamma * np.max(self.model.predict(next_state)[0])
             else:
                 target[0][action] = reward
