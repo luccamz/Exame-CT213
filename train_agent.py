@@ -3,21 +3,21 @@ from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from gymnasium.wrappers.time_limit import TimeLimit
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
-from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED
+from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED, SLIPPERY
 
-NUM_EPISODES = 500  # Number of episodes used for training
+NUM_EPISODES = BOARD_SZ*125  # Number of episodes used for training
 
 # generates map from the seed
 map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
-env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=True)
+env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY)
 env = TimeLimit(env, TIME_LIMIT) # generates truncated state upon reaching time limit
 action_size = env.action_space.n
-observation_sz = env.observation_space.n
+observation_sz = int(env.observation_space.n)
 
 # Creating the DQN agent
-agent = DQNAgent(observation_sz, action_size, buffer_size= int(20*observation_sz))
+agent = DQNAgent(observation_sz, action_size, buffer_size = 3*observation_sz)
 
-batch_size = observation_sz  # batch size used for the experience replay
+batch_size = BOARD_SZ  # batch size used for the experience replay
 return_history = []
 
 for episode in range(1, NUM_EPISODES + 1):
@@ -27,6 +27,7 @@ for episode in range(1, NUM_EPISODES + 1):
     cumulative_reward = 0.0
     # previous time step action
     prev_action = -1 
+    f = 1.0
     for time in range(1, TIME_LIMIT+1):
         # Select action
         action = agent.act(state)
@@ -39,13 +40,15 @@ for episode in range(1, NUM_EPISODES + 1):
         agent.append_experience(state, action, reward, next_state)
         state = next_state
         # Accumulate reward
-        cumulative_reward = agent.gamma * cumulative_reward + reward
-        if terminated or truncated:
-            print("episode: {}/{}, time: {}, score: {:.6}, epsilon: {:.3}"
-                  .format(episode, NUM_EPISODES, time, cumulative_reward, agent.epsilon))
+        cumulative_reward += f*reward
+        f *= agent.gamma
+        if (terminated or truncated):
+            if episode % 10 == 0:
+                print("episode: {}/{}, time: {}, score: {:.6}, epsilon: {:.3}"
+                      .format(episode, NUM_EPISODES, time, cumulative_reward, agent.epsilon))
             break
         # We only update the policy if we already have enough experience in memory
-        if len(agent.replay_buffer) > 2 * batch_size:
+        if len(agent.replay_buffer) > batch_size:
             agent.replay(batch_size)
     return_history.append(cumulative_reward)
     agent.update_epsilon()
