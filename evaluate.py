@@ -5,13 +5,13 @@ from gymnasium.wrappers.time_limit import TimeLimit
 import numpy as np
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
-from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED
+from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED, SLIPPERY
 
 NUM_EPISODES = 50  # Number of episodes used for evaluation
 RENDER = True # choose whether to show the GUI of the gym environment
 
 map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
-env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=True, render_mode='human' if RENDER else None)
+env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY, render_mode='human' if RENDER else None)
 env = TimeLimit(env, TIME_LIMIT*BOARD_SZ)
 action_size = env.action_space.n
 observation_sz = env.observation_space.n
@@ -27,6 +27,7 @@ else:
     print('No weights found from previous learning session. Unable to proceed.')
     exit(-1)
 
+print(agent.q)
 agent.display_greedy_policy()
 
 return_history = []
@@ -38,6 +39,7 @@ for episode in range(1, NUM_EPISODES + 1):
     # Cumulative reward is the return since the beginning of the episode
     cumulative_reward = 0.0
     prev_action = -1
+    f = 1
     for time in range(1, TIME_LIMIT + 1):
         # Render the environment for visualization
         if RENDER:
@@ -51,7 +53,8 @@ for episode in range(1, NUM_EPISODES + 1):
         prev_action = action
         state = next_state
         # Accumulate reward
-        cumulative_reward = agent.gamma * cumulative_reward + reward
+        cumulative_reward += f*reward
+        f *= agent.gamma
         if terminated or truncated:
             print("episode: {}/{}, time: {}, score: {:.6f}, epsilon: {:.3f}"
                   .format(episode, NUM_EPISODES, time, cumulative_reward, agent.epsilon))
