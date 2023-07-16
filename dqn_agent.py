@@ -4,12 +4,13 @@ from collections import deque
 from tensorflow import keras
 from keras import models, layers, activations
 from tensorflow import optimizers, losses
+from utils import BOARD_SZ
 
 class DQNAgent:
     """
     Represents a Deep Q-Networks (DQN) agent.
     """
-    def __init__(self, action_size, state_size = 1, gamma=0.95, epsilon=0.5, epsilon_min=0.01, epsilon_decay=0.98, learning_rate=0.001, buffer_size=4098):
+    def __init__(self, action_size, state_size = 1, gamma=0.95, epsilon=0.7, epsilon_min=0.01, epsilon_decay=0.98, learning_rate=0.001, buffer_size=200*BOARD_SZ):
         """
         Creates a Deep Q-Networks (DQN) agent.
 
@@ -55,7 +56,6 @@ class DQNAgent:
         model.add(layers.Dense(self.action_size, activation = activations.linear))
         model.compile(loss=losses.mse,
                        optimizer=optimizers.legacy.Adam(learning_rate = self.learning_rate))
-        model.summary()
         return model
 
     def act(self, state):
@@ -67,14 +67,14 @@ class DQNAgent:
         :return: chosen action.
         :rtype: int.
         """
-        values = self.model.predict(state)
+        values = self.model.predict(state)[0]
         r = random.uniform(0,1)
         if r < self.epsilon:
             return int(np.random.uniform(high=self.action_size))
         else:
             return np.argmax(values)
 
-    def append_experience(self, state, action, reward, next_state, done):
+    def append_experience(self, state, action, reward, next_state, completed):
         """
         Appends a new experience to the replay buffer (and forget an old one if the buffer is full).
 
@@ -86,10 +86,10 @@ class DQNAgent:
         :type reward: float.
         :param next_state: next state.
         :type next_state: NumPy array with dimension (1, 2).
-        :param done: if the simulation is over after this experience.
-        :type done: bool.
+        :param completed: if the end goal was reached
+        :type completed: int.
         """
-        self.replay_buffer.append((state, action, reward, next_state, done))
+        self.replay_buffer.append((state, action, reward, next_state, completed))
 
     def replay(self, batch_size):
         """
@@ -102,9 +102,9 @@ class DQNAgent:
         """
         minibatch = random.sample(self.replay_buffer, batch_size)
         states, targets = [], []
-        for state, action, reward, next_state, done in minibatch:
+        for state, action, reward, next_state, completed in minibatch:
             target = self.model.predict(state)
-            if not done:
+            if completed != 1:
                 target[0][action] = reward + self.gamma * np.max(self.model.predict(next_state)[0])
             else:
                 target[0][action] = reward
