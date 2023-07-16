@@ -1,19 +1,9 @@
-import os
-
-# to silence tensorflow warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from gymnasium.wrappers.time_limit import TimeLimit
-import numpy as np
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED
-import tensorflow as tf
-
-# rhis is important
-tf.compat.v1.disable_eager_execution()
 
 NUM_EPISODES = 500  # Number of episodes used for training
 
@@ -64,7 +54,6 @@ for episode in range(1, NUM_EPISODES + 1):
         agent.save("frozen_lake.pkl")
 
 agent.save("frozen_lake.pkl")
-#print(agent.q)
 agent.display_greedy_policy()
 
 plt.plot(return_history, 'b')
