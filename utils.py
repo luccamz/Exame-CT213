@@ -1,7 +1,7 @@
 from numpy import dot
 
 # gym enviroment params
-BOARD_SZ = 4 # side length for the frozen lake env board
+BOARD_SZ = 8 # side length for the frozen lake env board
 BOARD_SHAPE = (BOARD_SZ, BOARD_SZ) 
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 25*BOARD_SZ # number of time steps before truncation
@@ -23,7 +23,7 @@ rp = {
     "goal_direction" : 1.,
     #"deliberate_action" : 2.,
     #"lost_on_time" : -80.,
-    "stuck" : -3.,
+    "stuck" : -2.,
     #"moving_backwards" : -10.,
     "fell_in_hole" : -1000.,
     #"at_corner" : -100
