@@ -62,3 +62,4 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     return dot(list(rp.values()), states) 
 
 action_dir = ['L','D','R','U']
+act_arrows = ["←","↓","→","↑"]

@@ -58,7 +58,8 @@ for episode in range(1, NUM_EPISODES + 1):
         agent.save("frozen_lake.pkl")
 
 agent.save("frozen_lake.pkl")
-agent.display_greedy_policy()
+print("Greedy policy:")
+print(agent.display_greedy_policy())
 
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')

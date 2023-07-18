@@ -6,12 +6,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED, SLIPPERY
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 NUM_EPISODES = 50  # Number of episodes used for evaluation
 RENDER = False # choose whether to show the GUI of the gym environment
 
 map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
-env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY, render_mode='human' if RENDER else None)
+env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY, render_mode='human' if RENDER else 'rgb_array')
 env = TimeLimit(env, TIME_LIMIT)
 action_size = env.action_space.n
 observation_sz = env.observation_space.n
@@ -27,10 +29,20 @@ else:
     print('No weights found from previous learning session. Unable to proceed.')
     exit(-1)
 
-print(agent.q) # for troubleshooting
+# print(agent.q) # for troubleshooting
 
-# The policy as a table of the preferred action of each board slot
-agent.display_greedy_policy()
+sns.heatmap(
+        agent.greedy_policy(),
+        annot=agent.display_greedy_policy(plot_mode=True),
+        fmt="",
+        cmap=sns.color_palette("Blues", as_cmap=True),
+        linewidths=0.7,
+        linecolor="black",
+        xticklabels=[],
+        yticklabels=[],
+        annot_kws={"fontsize": "xx-large"},
+    ).set(title="Learned Q-values\nArrows represent best action")
+plt.savefig("learned_greedy.eps")
 
 return_history = []
 time_history = []
@@ -64,6 +76,10 @@ for episode in range(1, NUM_EPISODES + 1):
             break
     return_history.append(cumulative_reward)
     rate_of_completion += (completed - rate_of_completion)/episode
+
+if not RENDER:
+    plt.imsave("last_frame.eps",env.render()) # saves the last frame of the last episode
+
 # Prints mean return
 print('Mean return: ', np.mean(return_history))
 print('Mean time: ', np.mean(time_history))
@@ -71,6 +87,7 @@ print('Rate of completion: {:.2f}%'.format(rate_of_completion*100))
 
 
 # Plots return history
+plt.figure()
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')

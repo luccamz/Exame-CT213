@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from collections import deque
-from utils import action_dir, BOARD_SZ, TIME_LIMIT
+from utils import action_dir, act_arrows, BOARD_SZ, TIME_LIMIT
 
 class DQNAgent:
     """
@@ -118,10 +118,12 @@ class DQNAgent:
         if self.epsilon < self.epsilon_min:
             self.epsilon = self.epsilon_min
     
-    def display_greedy_policy(self):
-        disp = []
-        for row in self.q:
-            disp.append(action_dir[row.argmax()])
-        disp = np.reshape(disp, (BOARD_SZ, BOARD_SZ))
-        print("Greedy policy:")
-        print(disp)
+    def greedy_policy(self):
+        return self.q.argmax(axis = 1).reshape((BOARD_SZ, BOARD_SZ))
+    
+    def display_greedy_policy(self, plot_mode = False):
+        f = lambda x: act_arrows[x] if plot_mode else action_dir[x]
+        gp = self.greedy_policy()
+        encod = map(f, gp.flatten())
+        display = np.reshape([*encod], (BOARD_SZ, BOARD_SZ))
+        return np.where(gp > 0.0, display, np.full_like(display, ' ', dtype = str))
