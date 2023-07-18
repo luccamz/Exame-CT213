@@ -32,10 +32,9 @@ else:
 # print(agent.q) # for troubleshooting
 
 sns.heatmap(
-        agent.greedy_policy(),
+        agent.q_max_vals(),
         annot=agent.display_greedy_policy(plot_mode=True),
         fmt="",
-        cmap=sns.color_palette("Blues", as_cmap=True),
         linewidths=0.7,
         linecolor="black",
         xticklabels=[],
