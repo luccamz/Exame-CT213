@@ -2,6 +2,7 @@ from numpy import dot
 
 # gym enviroment params
 BOARD_SZ = 4
+BOARD_SHAPE = (BOARD_SZ, BOARD_SZ)
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 25*BOARD_SZ
 FIXED_SEED = 0
