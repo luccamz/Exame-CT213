@@ -17,7 +17,7 @@ observation_sz = int(env.observation_space.n)
 # Creating the DQN agent
 agent = DQNAgent(observation_sz, action_size, buffer_size = 3*observation_sz)
 
-batch_size = BOARD_SZ  # batch size used for the experience replay
+batch_size = 4*BOARD_SZ  # batch size used for the experience replay
 return_history = []
 
 for episode in range(1, NUM_EPISODES + 1):
@@ -26,9 +26,9 @@ for episode in range(1, NUM_EPISODES + 1):
     # Cumulative reward is the return since the beginning of the episode
     cumulative_reward = 0.0
     # previous time step action
-    prev_action = -1 
+    prev_action = -2
     f = 1.0
-    for time in range(1, TIME_LIMIT+1):
+    for time in range(1, TIME_LIMIT + 1):
         # Select action
         action = agent.act(state)
         # Take action, observe reward and new state
@@ -38,11 +38,12 @@ for episode in range(1, NUM_EPISODES + 1):
         prev_action = action
         # Appending this experience to the experience replay buffer
         agent.append_experience(state, action, reward, next_state)
+        agent.update()
         state = next_state
         # Accumulate reward
         cumulative_reward += f*reward
         f *= agent.gamma
-        if (terminated or truncated):
+        if terminated or truncated:
             if episode % 10 == 0:
                 print("episode: {}/{}, time: {}, score: {:.6}, epsilon: {:.3}"
                       .format(episode, NUM_EPISODES, time, cumulative_reward, agent.epsilon))
