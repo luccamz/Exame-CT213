@@ -31,10 +31,13 @@ else:
 
 # print(agent.q) # for troubleshooting
 
+values = agent.q_max_vals()
 sns.heatmap(
-        agent.q_max_vals(),
+        values,
         annot=agent.display_greedy_policy(plot_mode=True),
         fmt="",
+        cmap='crest',
+        mask=values== 0.0,
         linewidths=0.7,
         linecolor="black",
         xticklabels=[],
