@@ -1,12 +1,12 @@
 from numpy import dot
 
 # gym enviroment params
-BOARD_SZ = 4
-BOARD_SHAPE = (BOARD_SZ, BOARD_SZ)
+BOARD_SZ = 4 # side length for the frozen lake env board
+BOARD_SHAPE = (BOARD_SZ, BOARD_SZ) 
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
-TIME_LIMIT = 25*BOARD_SZ
-FIXED_SEED = 0
-SLIPPERY = True
+TIME_LIMIT = 25*BOARD_SZ # number of time steps before truncation
+FIXED_SEED = 0 # seed for random map generation
+SLIPPERY = True # whether ground is slippery or not
 
 # maps the flattened state displacement to the corresponding action
 displacement_to_action = { 
@@ -34,19 +34,19 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     Modifies rewards for better guided training in the Frozen Lake environment.
 
     :param state: state.
-    :type state: NumPy array with dimension (1, 1).
+    :type state: int.
     :param prev_action: previous time step action.
     :type prev_action: int.
-    :param action: action.
+    :param action: current time step action.
     :type action: int.
-    :param completed: whether objective was reached
-    :type completed: float.
+    :param completed: whether objective was reached (1 if reached, 0 otherwise).
+    :type completed: int.
     :param next_state: next state.
-    :type next_state: NumPy array with dimension (1, 1).
+    :type next_state: int.
     :param terminated: whether the episode ended with the action
-    :type terminated: float.
-    :param completed: whether objective was reached
-    :type completed: float.
+    :type terminated: bool.
+    :param lost_on_time: whether truncation happened (reached time limit)
+    :type lost_on_time: bool.
     :return: modified reward.
     :rtype: float.
     """
@@ -62,5 +62,8 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     states = list(map(loc.get, rp.keys()))
     return dot(list(rp.values()), states) 
 
+# maps (index -> value) action numbers to their direction initials
 action_dir = ['L','D','R','U']
+
+# maps action numbers to arrows in their respective direcion
 act_arrows = ["←","↓","→","↑"]
