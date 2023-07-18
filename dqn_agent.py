@@ -1,13 +1,13 @@
 import random
 import numpy as np
 from collections import deque
-from utils import action_dir, BOARD_SZ
+from utils import action_dir, BOARD_SZ, TIME_LIMIT
 
 class DQNAgent:
     """
     Represents a Deep Q-Networks (DQN) agent.
     """
-    def __init__(self, observation_sz, action_size, state_size = 1, alpha = 0.9, gamma=0.95, epsilon=0.8, epsilon_min=0.01, epsilon_decay=0.99, buffer_size=BOARD_SZ**2):
+    def __init__(self, observation_sz, action_size, state_size = 1, alpha = 0.8, gamma=0.98, epsilon=0.8, epsilon_min=0.01, epsilon_decay=0.99, buffer_size=TIME_LIMIT):
         """
         Creates a Deep Q-Networks (DQN) agent.
 
@@ -55,6 +55,18 @@ class DQNAgent:
             return int(np.random.uniform(high=self.action_size))
         else:
             return np.argmax(self.q[state,:])
+
+    def update(self):
+        """
+        Learns from memorized experience.
+
+        :param batch_size: size of the minibatch taken from the replay buffer.
+        :type batch_size: int.
+        :return: loss computed during the neural network training.
+        :rtype: float.
+        """
+        state, action, reward, next_state = self.replay_buffer[-1]
+        self.q[state, action] += self.alpha*(reward + self.gamma * np.max(self.q[next_state, :]) - self.q[state, action])
 
     def append_experience(self, state, action, reward, next_state):
         """
