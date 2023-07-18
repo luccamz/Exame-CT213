@@ -61,7 +61,9 @@ agent.save("frozen_lake.pkl")
 print("Greedy policy:")
 print(agent.display_greedy_policy())
 
+slip = '' if SLIPPERY else '_not_slippery'
+
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')
-plt.savefig("dqn_training_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED), format='eps')
+plt.savefig("dqn_training_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps')

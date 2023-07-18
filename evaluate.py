@@ -31,6 +31,7 @@ else:
 
 # print(agent.q) # for troubleshooting
 
+slip = '' if SLIPPERY else '_not_slippery'
 values = agent.q_max_vals()
 sns.heatmap(
         values,
@@ -44,7 +45,7 @@ sns.heatmap(
         yticklabels=[],
         annot_kws={"fontsize": "xx-large"},
     ).set(title="Learned Q-values\nArrows represent best action")
-plt.savefig("learned_greedy_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED))
+plt.savefig("learned_greedy_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps")
 
 return_history = []
 time_history = []
@@ -80,17 +81,16 @@ for episode in range(1, NUM_EPISODES + 1):
     rate_of_completion += (completed - rate_of_completion)/episode
 
 if not RENDER:
-    plt.imsave("last_frame_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED),env.render()) # saves the last frame of the last episode
+    plt.imsave("last_frame_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip +".eps",env.render()) # saves the last frame of the last episode
 
 # Prints mean return
 print('Mean return: ', np.mean(return_history))
 print('Mean time: ', np.mean(time_history))
 print('Rate of completion: {:.2f}%'.format(rate_of_completion*100))
 
-
 # Plots return history
 plt.figure()
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')
-plt.savefig("dqn_evaluation_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED), format='eps')
+plt.savefig("dqn_evaluation_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps')

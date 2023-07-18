@@ -1,12 +1,12 @@
 from numpy import dot
 
 # gym enviroment params
-BOARD_SZ = 8 # side length for the frozen lake env board
+BOARD_SZ = 6 # side length for the frozen lake env board
 BOARD_SHAPE = (BOARD_SZ, BOARD_SZ) 
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 25*BOARD_SZ # number of time steps before truncation
 FIXED_SEED = 0 # seed for random map generation
-SLIPPERY = True # whether ground is slippery or not
+SLIPPERY = False # whether ground is slippery or not
 
 # maps the flattened state displacement to the corresponding action
 displacement_to_action = { 
