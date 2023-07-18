@@ -88,8 +88,15 @@ class DQNAgent:
         :type batch_size: int.
         """
         minibatch = random.sample(self.replay_buffer, batch_size)
+        state_action_pairs = []
+        targets = []
         for state, action, reward, next_state in minibatch:
-            self.q[state, action] += self.alpha*(reward + self.gamma * np.max(self.q[next_state, :]) - self.q[state, action])
+            targets.append(
+                self.q[state, action] + self.alpha*(reward + self.gamma * np.max(self.q[next_state, :]) - self.q[state, action])
+                )
+            state_action_pairs.append((state, action))
+        for pair, target in zip(state_action_pairs, targets):
+            self.q[pair] = target
 
     def load(self, name: str):
         """
