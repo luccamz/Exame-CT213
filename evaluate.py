@@ -44,7 +44,7 @@ sns.heatmap(
         yticklabels=[],
         annot_kws={"fontsize": "xx-large"},
     ).set(title="Learned Q-values\nArrows represent best action")
-plt.savefig("learned_greedy.eps")
+plt.savefig("learned_greedy_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED))
 
 return_history = []
 time_history = []
@@ -80,7 +80,7 @@ for episode in range(1, NUM_EPISODES + 1):
     rate_of_completion += (completed - rate_of_completion)/episode
 
 if not RENDER:
-    plt.imsave("last_frame.eps",env.render()) # saves the last frame of the last episode
+    plt.imsave("last_frame_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED),env.render()) # saves the last frame of the last episode
 
 # Prints mean return
 print('Mean return: ', np.mean(return_history))
@@ -93,4 +93,4 @@ plt.figure()
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')
-plt.savefig('dqn_evaluation.eps', format='eps')
+plt.savefig("dqn_evaluation_"+MAP_NAME+"_seed{}.eps".format(FIXED_SEED), format='eps')
