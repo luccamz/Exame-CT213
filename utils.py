@@ -49,6 +49,12 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     :return: modified reward.
     :rtype: float.
     """
+
+    # the way this works is, you add an entry to the json file containing the weight, then
+    # in the body of this function you define a variable with the exact same name, that should evaluate
+    # to 0 if the weight shouldn't be applied and to 1 if it should (so, essentially a boolean). 
+    # There's no need to consider signs in here because those go in the weights.
+     
     displacement = next_state - state
     action_taken = displacement_to_action[displacement]
     deliberate_action = int(action_taken == action)
