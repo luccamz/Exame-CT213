@@ -1,18 +1,15 @@
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
-from gymnasium.wrappers.time_limit import TimeLimit
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED, SLIPPERY
 
-NUM_EPISODES = BOARD_SZ*125  # Number of episodes used for training
-
 # generates map from the seed
 map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
-env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY)
-env = TimeLimit(env, TIME_LIMIT) # generates truncated state upon reaching time limit
+env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY, max_episode_steps=TIME_LIMIT)
 action_size = env.action_space.n
 observation_sz = int(env.observation_space.n)
+NUM_EPISODES = 2000  # Number of episodes used for training
 
 # Creating the DQN agent
 agent = DQNAgent(observation_sz, action_size, buffer_size = 3*observation_sz)
@@ -34,7 +31,7 @@ for episode in range(1, NUM_EPISODES + 1):
         # Take action, observe reward and new state
         next_state, completed, terminated, truncated, _ = env.step(action)
         # Modifying reward
-        reward = reward_engineering(state, prev_action, action, completed, next_state, terminated, truncated)
+        reward = reward_engineering(state, prev_action, action, completed, next_state, terminated, truncated and not completed)
         prev_action = action
         # Appending this experience to the experience replay buffer
         agent.append_experience(state, action, reward, next_state)
@@ -44,7 +41,7 @@ for episode in range(1, NUM_EPISODES + 1):
         cumulative_reward += f*reward
         f *= agent.gamma
         if terminated or truncated:
-            if episode % 10 == 0:
+            if episode % 50 == 0:
                 print("episode: {}/{}, time: {}, score: {:.6}, epsilon: {:.3}"
                       .format(episode, NUM_EPISODES, time, cumulative_reward, agent.epsilon))
             break
@@ -53,7 +50,7 @@ for episode in range(1, NUM_EPISODES + 1):
             agent.replay(batch_size)
     return_history.append(cumulative_reward)
     agent.update_epsilon()
-    if episode % 20:
+    if episode % 50:
         #Saving the model to disk
         agent.save("frozen_lake.pkl")
 
@@ -66,4 +63,4 @@ slip = '' if SLIPPERY else '_not_slippery'
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')
-plt.savefig("dqn_training_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps')
+plt.savefig("dqn_training_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps', bbox_inches='tight')
