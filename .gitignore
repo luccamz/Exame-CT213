@@ -1,3 +1,6 @@
 .vscode
 __*
-*[.eps, .png, .jpg, .pkl]
+*.eps 
+*.png
+*.jpg
+*.pkl
