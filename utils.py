@@ -2,12 +2,16 @@ from numpy import dot
 import json
 
 # gym enviroment params
-BOARD_SZ = 4 # side length for the frozen lake env board
+
+# user defined params (set these before training and don't change before evaluation)
+BOARD_SZ = 6 # side length for the frozen lake env board
+SLIPPERY = True # whether ground is slippery or not
+
+# dependent params (don't change these)
 BOARD_SHAPE = (BOARD_SZ, BOARD_SZ) 
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 25*BOARD_SZ # number of time steps before truncation
 FIXED_SEED = 0 # seed for random map generation
-SLIPPERY = True # whether ground is slippery or not
 
 # maps the flattened state displacement to the corresponding action
 displacement_to_action = { 
@@ -20,7 +24,7 @@ displacement_to_action = {
 
 #if True, then loads weigths for general purpose, else, loads optimized weigths for particular problem
 # that being the 6 x 6 slippery with seed 0
-GENERAL_RP = True 
+GENERAL_RP = True # TODO ! User, don't change this to False
 
 # rewards and punishments coefficients
 path = 'general.json' if GENERAL_RP else 'particular.json'
@@ -53,7 +57,10 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     # the way this works is, you add an entry to the json file containing the weight, then
     # in the body of this function you define a variable with the exact same name, that should evaluate
     # to 0 if the weight shouldn't be applied and to 1 if it should (so, essentially a boolean). 
-    # There's no need to consider signs in here because those go in the weights.
+    # There's no need to consider signs in here because those go in the weights. If you want to exclude any
+    # weight then you can either delete its entry from the json from which it's being read or delete the local 
+    # variable here (or set either one to 0, obviously), therefore, it's a better practice to control it 
+    # thorugh the json file, so you don't need to change the function each time
      
     displacement = next_state - state
     action_taken = displacement_to_action[displacement]
