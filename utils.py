@@ -2,7 +2,7 @@ from numpy import dot
 import json
 
 # gym enviroment params
-BOARD_SZ = 8 # side length for the frozen lake env board
+BOARD_SZ = 4 # side length for the frozen lake env board
 BOARD_SHAPE = (BOARD_SZ, BOARD_SZ) 
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 25*BOARD_SZ # number of time steps before truncation
@@ -19,7 +19,7 @@ displacement_to_action = {
 }
 
 #if True, then loads weigths for general purpose, else, loads optimized weigths for particular problem
-# that being the 8 x 8 slippery with seed 0
+# that being the 6 x 6 slippery with seed 0
 GENERAL_RP = True 
 
 # rewards and punishments coefficients
@@ -27,8 +27,6 @@ path = 'general.json' if GENERAL_RP else 'particular.json'
 
 with open(path, 'r') as f:
     rp = json.load(f)
-
-
 
 def reward_engineering(state: int, prev_action: int, action: int, completed: int, next_state: int, terminated: bool, lost_on_time: bool) -> float:
     """
@@ -54,7 +52,9 @@ def reward_engineering(state: int, prev_action: int, action: int, completed: int
     displacement = next_state - state
     action_taken = displacement_to_action[displacement]
     deliberate_action = int(action_taken == action)
-    goal_direction = 2 + 0.5*(action_taken % 3 != 0) if (action % 3) != 0 else -5
+    goal_direction = (action % 3 != 0)
+    went_goal_direction =  (action_taken % 3 != 0)
+    opposite_direction = (action % 3 == 0)
     stuck = int(displacement == 0)
     fell_in_hole = int(completed == 0 and terminated and not lost_on_time)
     towards_hole = int(fell_in_hole and deliberate_action)
