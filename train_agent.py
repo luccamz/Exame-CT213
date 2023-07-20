@@ -1,15 +1,20 @@
+import os
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
-from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED, SLIPPERY
+from utils import reward_engineering, BOARD_SZ, TIME_LIMIT, MAP_NAME, FIXED_SEED, SLIPPERY, GENERAL_RP
+
+
+if not os.path.exists('output/'):
+    os.mkdir('output/')
 
 # generates map from the seed
 map_desc = generate_random_map(size=BOARD_SZ, seed = FIXED_SEED)
 env = gym.make('FrozenLake-v1', desc=map_desc, map_name=MAP_NAME, is_slippery=SLIPPERY, max_episode_steps=TIME_LIMIT)
 action_size = env.action_space.n
 observation_sz = int(env.observation_space.n)
-NUM_EPISODES = 2000  # Number of episodes used for training
+NUM_EPISODES = 2000  if GENERAL_RP else 500 # Number of episodes used for training
 
 # Creating the DQN agent
 agent = DQNAgent(observation_sz, action_size, buffer_size = 3*observation_sz)
@@ -52,9 +57,9 @@ for episode in range(1, NUM_EPISODES + 1):
     agent.update_epsilon()
     if episode % 50:
         #Saving the model to disk
-        agent.save("frozen_lake.pkl")
+        agent.save("output/frozen_lake.pkl")
 
-agent.save("frozen_lake.pkl")
+agent.save("output/frozen_lake.pkl")
 print("Greedy policy:")
 print(agent.display_greedy_policy())
 
@@ -63,4 +68,4 @@ slip = '' if SLIPPERY else '_not_slippery'
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')
-plt.savefig("dqn_training_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps', bbox_inches='tight')
+plt.savefig("output/dqn_training_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps', bbox_inches='tight')

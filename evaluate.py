@@ -22,9 +22,9 @@ observation_sz = env.observation_space.n
 agent = DQNAgent(observation_sz, action_size, epsilon=0.0, epsilon_min=0.0)
 
 # Checking if weights from previous learning session exists
-if os.path.exists('frozen_lake.pkl'):
+if os.path.exists('output/frozen_lake.pkl'):
     print('Loading Q table from previous learning session.')
-    agent.load("frozen_lake.pkl")
+    agent.load("output/frozen_lake.pkl")
 else:
     print('No Q table found from previous learning session. Unable to proceed.')
     exit(-1)
@@ -45,7 +45,7 @@ sns.heatmap(
         yticklabels=[],
         annot_kws={"fontsize": "xx-large"}, # change fontsize for greater board sizes 
     )
-plt.savefig("learned_greedy_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", bbox_inches='tight')
+plt.savefig("output/learned_greedy_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", bbox_inches='tight')
 
 return_history = []
 time_history = []
@@ -84,7 +84,7 @@ for episode in range(1, NUM_EPISODES + 1):
     rate_of_completion += (completed - rate_of_completion)/episode
 
 if not RENDER:
-    plt.imsave("last_frame_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip +".eps",env.render()) # saves the last frame of the last episode
+    plt.imsave("output/last_frame_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip +".eps",env.render()) # saves the last frame of the last episode
 
 # Prints mean return
 print('Mean return: ', np.mean(return_history))
@@ -97,4 +97,4 @@ plt.figure()
 plt.plot(return_history, 'b')
 plt.xlabel('Episode')
 plt.ylabel('Return')
-plt.savefig("dqn_evaluation_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps', bbox_inches='tight')
+plt.savefig("output/dqn_evaluation_"+MAP_NAME+"_seed{}".format(FIXED_SEED)+slip+".eps", format='eps', bbox_inches='tight')
