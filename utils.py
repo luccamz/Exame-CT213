@@ -1,7 +1,8 @@
 from numpy import dot
+import json
 
 # gym enviroment params
-BOARD_SZ = 4 # side length for the frozen lake env board
+BOARD_SZ = 8 # side length for the frozen lake env board
 BOARD_SHAPE = (BOARD_SZ, BOARD_SZ) 
 MAP_NAME = "{}x{}".format(BOARD_SZ, BOARD_SZ)
 TIME_LIMIT = 25*BOARD_SZ # number of time steps before truncation
@@ -17,17 +18,17 @@ displacement_to_action = {
      BOARD_SZ : 1 
 }
 
+#if True, then loads weigths for general purpose, else, loads optimized weigths for particular problem
+# that being the 8 x 8 slippery with seed 0
+GENERAL_RP = True 
+
 # rewards and punishments coefficients
-rp = {
-    "completed" : 1000.,
-    "goal_direction" : 1.,
-    "deliberate_action" : 1.,
-    #"lost_on_time" : 10.,
-    "stuck" : -2.5,
-    "moving_backwards" : -1.,
-    "fell_in_hole" : -700.,
-    "towards_hole" : -700
-}
+path = 'general.json' if GENERAL_RP else 'particular.json'
+
+with open(path, 'r') as f:
+    rp = json.load(f)
+
+
 
 def reward_engineering(state: int, prev_action: int, action: int, completed: int, next_state: int, terminated: bool, lost_on_time: bool) -> float:
     """
