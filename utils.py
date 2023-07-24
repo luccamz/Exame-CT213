@@ -24,7 +24,7 @@ displacement_to_action = {
 
 #if True, then loads weigths for general purpose, else, loads optimized weigths for particular problem
 # that being the 6 x 6 slippery with seed 0
-GENERAL_RP = False # TODO ! User, don't change this to False
+GENERAL_RP = True # TODO ! User, don't change this to False
 
 # rewards and punishments coefficients
 path = 'general.json' if GENERAL_RP else 'particular.json'
